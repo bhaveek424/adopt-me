@@ -2,6 +2,8 @@ import { Component } from "react";
 import { useParams } from "react-router-dom";
 import Carousel from "./Carousel";
 import ErrorBoundry from "./ErrorBoundry";
+import Modal from "./Modal";
+import ThemeContext from "./ThemeContext";
 
 class Details extends Component {
   //cant use hooks with class comonents
@@ -11,7 +13,7 @@ class Details extends Component {
   //this.state = { loading: true };
   //}
 
-  state = { loading: true }; //thanks to babel plugin this one line of code is equivalent to the above block
+  state = { loading: true, showModal: false }; //thanks to babel plugin this one line of code is equivalent to the above block
 
   // class components have "life-cycle" methods instead of useEffect
   async componentDidMount() {
@@ -35,7 +37,7 @@ class Details extends Component {
       return <h2>loading ...</h2>;
     }
 
-    const { animal, breed, city, state, description, name, images } =
+    const { animal, breed, city, state, description, name, images, showModal } =
       this.state;
 
     return (
@@ -46,8 +48,26 @@ class Details extends Component {
           <h2>
             {animal} - {breed} - {city}, {state}
           </h2>
-          <button>Adopt {name}</button>
+          <ThemeContext.Consumer>
+            {([theme]) => (
+              <button
+                onClick={this.toggleModal}
+                style={{ backgroundColor: theme }}
+              >
+                Adopt {name}
+              </button>
+            )}
+          </ThemeContext.Consumer>
           <p>{description}</p>
+          {showModal ? (
+            <Modal>
+              <div>
+                <h1>Would you like to adopt {name} ?</h1>
+                <a href="https://bit.ly/pet-adopt">Yes</a>
+                <button onClick={this.toggleModal}>No</button>
+              </div>
+            </Modal>
+          ) : null}
         </div>
       </div>
     );
@@ -56,9 +76,10 @@ class Details extends Component {
 
 const WrappedDetails = () => {
   const params = useParams();
+  // const [theme] = useContext(ThemeContext); the easy way. and pass it in Details
   return (
     <ErrorBoundry>
-      <Details params={params} />;
+      <Details params={params} />; {/* pass theme object here */}
     </ErrorBoundry>
   );
 };
